@@ -1,69 +1,231 @@
 import Image from "next/image";
+import { ArrowRightIcon, Building2Icon, FactoryIcon, LandmarkIcon, StoreIcon } from "lucide-react";
+import { ContactForm } from "@/components/contact-form";
+import { SiteHeader } from "@/components/site-header";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { commitments, sectors, serviceGroups, site } from "@/lib/site";
+
+const sectorIcons = {
+  building: Building2Icon,
+  store: StoreIcon,
+  factory: FactoryIcon,
+  landmark: LandmarkIcon,
+};
+
+const serviceNumbers = new Map(serviceGroups.flatMap((group) => group.services).map((service, index) => [service.name, index + 1]));
+
+const container = "mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8";
+const heading =
+  "font-heading text-4xl leading-none font-bold tracking-tight uppercase text-balance sm:text-5xl lg:text-6xl";
 
 export default function Home() {
+  const { email, phone, address, abn } = site.contact;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "GeneralContractor",
+    name: site.name,
+    url: site.url,
+    description: site.supportLine,
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <>
+      <SiteHeader />
+      <main id="top" className="flex-1">
+        <section className="relative isolate flex min-h-[calc(100svh-4rem)] items-end overflow-hidden bg-primary text-primary-foreground">
+          <Image src="/images/hero-tower.jpg" alt="" fill priority sizes="100vw" className="-z-20 object-cover" />
+          <div className="absolute inset-0 -z-10 bg-gradient-to-t from-primary via-primary/85 to-primary/40" />
+          <div className={`${container} pt-24 pb-14 sm:pb-20`}>
+            <Badge className="mb-6 h-auto rounded-none bg-signal px-3 py-1.5 text-sm font-semibold whitespace-normal text-signal-foreground">
+              {site.tagline}
+            </Badge>
+            <h1 className="font-heading text-6xl leading-[0.92] font-bold tracking-tight uppercase sm:text-7xl lg:text-8xl xl:text-[7.5rem]">
+              {site.headline.map((line) => (
+                <span key={line} className="block">
+                  {line}
+                </span>
+              ))}
+            </h1>
+            <p className="mt-7 max-w-2xl text-lg leading-relaxed text-primary-foreground/85 sm:text-xl">
+              {site.supportLine}
+            </p>
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+              <Button
+                render={<a href="#contact" />}
+                nativeButton={false}
+                className="h-12 bg-signal px-6 text-base font-semibold text-signal-foreground hover:bg-signal/85"
+              >
+                Discuss your project
+                <ArrowRightIcon data-icon="inline-end" />
+              </Button>
+              <Button
+                render={<a href="#services" />}
+                nativeButton={false}
+                variant="outline"
+                className="h-12 border-white/40 bg-transparent px-6 text-base font-semibold text-primary-foreground hover:bg-white/10 hover:text-primary-foreground"
+              >
+                View services
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        <section id="services" className="py-20 sm:py-28">
+          <div className={container}>
+            <div className="grid gap-5 lg:grid-cols-2 lg:items-end">
+              <h2 className={heading}>Every trade, one point of delivery</h2>
+              <p className="max-w-xl text-lg leading-relaxed text-muted-foreground lg:justify-self-end">
+                From structure through to supervision and inspections, we bring the work together under one partner.
+              </p>
+            </div>
+
+            <div className="mt-14 space-y-12">
+              {serviceGroups.map((group) => (
+                <div key={group.title} className="grid gap-4 lg:grid-cols-[14rem_1fr] lg:gap-8">
+                  <h3 className="border-t-2 border-primary pt-3 font-heading text-xl font-bold uppercase">
+                    {group.title}
+                  </h3>
+                  <ul className="grid border-t sm:grid-cols-2 xl:grid-cols-3">
+                    {group.services.map((service) => (
+                        <li key={service.name} className="flex gap-4 border-b p-5">
+                          <span className="pt-1 text-sm font-semibold text-muted-foreground tabular-nums">
+                            {String(serviceNumbers.get(service.name)).padStart(2, "0")}
+                          </span>
+                          <div>
+                            <p className="font-heading text-2xl font-semibold">{service.name}</p>
+                            <p className="mt-1 text-muted-foreground">{service.detail}</p>
+                          </div>
+                        </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+            <p className="mt-8 text-muted-foreground lg:pl-[16rem]">And associated construction services.</p>
+          </div>
+        </section>
+
+        <section id="about" className="border-y bg-card py-20 sm:py-28">
+          <div className={`${container} grid gap-12 lg:grid-cols-2 lg:gap-16`}>
+            <div className="relative min-h-80 overflow-hidden lg:min-h-full">
+              <Image
+                src="/images/site-survey.jpg"
+                alt="Surveyor in a high-visibility vest using a total station on site"
+                fill
+                sizes="(min-width: 1024px) 50vw, 100vw"
+                className="object-cover"
+              />
+            </div>
+            <div>
+              <h2 className={heading}>Your projects, completed to your exact specifications</h2>
+              <div className="mt-6 space-y-4 text-lg leading-relaxed text-muted-foreground">
+                <p>
+                  We specialise in high-quality, non-residential construction that meets the demands of modern business.
+                  From industrial facilities to commercial spaces, we deliver precision, performance, and projects built
+                  to last.
+                </p>
+                <p>
+                  At the core of our work is a commitment to delivering commercial spaces that reflect the highest
+                  standards of quality, functionality, and design. Each project is managed with precision and purpose.
+                </p>
+                <p>
+                  Our approach is grounded in collaboration, efficiency, and an unwavering focus on safety and long-term
+                  performance.
+                </p>
+              </div>
+              <div className="mt-8 grid grid-cols-2 gap-3">
+                {sectors.map((sector) => {
+                  const Icon = sectorIcons[sector.icon];
+                  return (
+                    <Card key={sector.name} size="sm" className="bg-background">
+                      <CardHeader>
+                        <Icon aria-hidden className="size-6 text-primary" />
+                      </CardHeader>
+                      <CardContent>
+                        <CardTitle className="font-heading text-xl! font-semibold">{sector.name}</CardTitle>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="delivery" className="bg-primary py-20 text-primary-foreground sm:py-28">
+          <div className={`${container} grid gap-10 lg:grid-cols-2 lg:gap-16`}>
+            <h2 className={heading}>How we deliver</h2>
+            <Accordion defaultValue={[commitments[0].title]}>
+              {commitments.map((item) => (
+                <AccordionItem key={item.title} value={item.title} className="border-white/20 not-last:border-b">
+                  <AccordionTrigger className="py-5 font-heading text-2xl font-semibold hover:no-underline **:data-[slot=accordion-trigger-icon]:text-signal">
+                    {item.title}
+                  </AccordionTrigger>
+                  <AccordionContent className="pb-5 text-base leading-relaxed text-primary-foreground/80">
+                    {item.body}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
+        </section>
+
+        <section id="contact" className="py-20 sm:py-28">
+          <div className={`${container} grid gap-10 lg:grid-cols-2 lg:gap-16`}>
+            <div>
+              <h2 className={heading}>Talk to us about your next project</h2>
+              <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
+                Tell us what you are building and which trades you need.
+              </p>
+              {(email || phone || address) && (
+                <ul className="mt-8 space-y-2 text-lg">
+                  {phone && (
+                    <li>
+                      <a href={`tel:${phone.replace(/\s/g, "")}`} className="font-medium underline-offset-4 hover:underline">
+                        {phone}
+                      </a>
+                    </li>
+                  )}
+                  {email && (
+                    <li>
+                      <a href={`mailto:${email}`} className="font-medium underline-offset-4 hover:underline">
+                        {email}
+                      </a>
+                    </li>
+                  )}
+                  {address && <li>{address}</li>}
+                </ul>
+              )}
+            </div>
+            <Card>
+              <CardContent className="p-2 sm:p-4">
+                <ContactForm />
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+      </main>
+
+      <footer className="bg-primary py-8 text-sm text-primary-foreground/75">
+        <div className={container}>
+          <p className="font-heading text-xl font-bold tracking-wide text-primary-foreground uppercase">{site.name}</p>
+          <Separator className="my-4 bg-white/15" />
+          <p>
+            {site.name} © {new Date().getFullYear()}. All rights reserved.
+            {abn && ` ABN ${abn}`}
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      </footer>
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
+      />
+    </>
   );
 }
